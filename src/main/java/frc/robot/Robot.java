@@ -43,10 +43,10 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
 
-    drive = new Drive();
-    blaster = new Blaster();
-    pez = new Pez();
-    boost = new Boost();
+    drive = new Drive(pilot);
+    blaster = new Blaster(gunner);
+    pez = new Pez(gunner);
+    boost = new Boost(gunner);
     stabilizer = new Stabilizer();
     pilot = new LogitechF310(0);
     gunner = new LogitechF310(1);
@@ -104,7 +104,8 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     drive.teleopUpdate();
-    blaster.teleopUpdate(gunner);
+    blaster.teleopUpdate();
+    pez.teleopUpdate();
     stabilizer.update();
   }
 

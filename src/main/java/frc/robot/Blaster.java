@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
+import frc.util.LogitechAxis;
 import frc.util.LogitechButton;
 import frc.util.LogitechF310;
 
@@ -11,23 +12,25 @@ public class Blaster{
 
     TalonFX top, bot, tilt;
 
-    double tiltSpeed = .25;
+    double tiltSpeed = .35;
     double topSpeed = 0.6, botSpeed = 0.8;
 
     ControlMode currentControl = ControlMode.PercentOutput; 
 
+    LogitechF310 gunner;
 
-    public Blaster(){
+    public Blaster(LogitechF310 gunner){
         top = new TalonFX(SystemMap.Blaster.TOPBLASTER);
         bot = new TalonFX(SystemMap.Blaster.BOTBLASTER);
         tilt = new TalonFX(SystemMap.Blaster.TILT);
 
         bot.setInverted(InvertType.InvertMotorOutput);
 
+        this.gunner = gunner;
     }
 
-    public void teleopUpdate(LogitechF310 gunner){
-        if(gunner.getRawButton(LogitechButton.RB) == true && gunner.getRawButton(LogitechButton.LB) == true){
+    public void teleopUpdate(){
+        if(gunner.getAxis(LogitechAxis.RT) >= 0.1 && gunner.getAxis(LogitechAxis.LT) >= 0.1){
             bot.set(currentControl, botSpeed);
             top.set(currentControl, topSpeed);
         }

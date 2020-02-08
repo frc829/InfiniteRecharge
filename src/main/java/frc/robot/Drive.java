@@ -5,7 +5,6 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.Solenoid;
 import frc.util.LogitechAxis;
 import frc.util.LogitechButton;
 import frc.util.LogitechF310;
@@ -14,50 +13,93 @@ public class Drive{
 
 
     private CANSparkMax flThrust, frThrust, blThrust, brThrust;
-    private Solenoid transmissionL, transmissionR;
     private LogitechF310 pilot;
     private double leftSpeed, rightSpeed;
     private boolean isLeftZone, isRightZone;
-    private boolean transmissionStatus = false;
-    private long lastGearShift;
 
-    public Drive(){
+    public double v = getLimelight("tv");
+    public double x = getLimelight("tx");
+
+    long lastCamera;
+
+    public Drive(LogitechF310 pilot){
         try {
 
             flThrust = new CANSparkMax(SystemMap.Drive.FLTHRUSTER, MotorType.kBrushless);
             frThrust = new CANSparkMax(SystemMap.Drive.FRTHRUSTER, MotorType.kBrushless);
             blThrust = new CANSparkMax(SystemMap.Drive.BLTHRUSTER, MotorType.kBrushless);
             brThrust = new CANSparkMax(SystemMap.Drive.BRTHRUSTER, MotorType.kBrushless);
-            
-            transmissionL = new Solenoid(SystemMap.Drive.PCM, SystemMap.Drive.TRANS_CHANNEL_OFF);
-			transmissionL.set(transmissionStatus);
-			transmissionR = new Solenoid(SystemMap.Drive.PCM, SystemMap.Drive.TRANS_CHANNEL_ON);
-			transmissionL.set(!transmissionStatus);
+
+            flThrust.setInverted(true);
+            blThrust.setInverted(true);
 
         } catch (Exception e) {
             System.out.println("Error while initializing.");
         }
-        lastGearShift = System.currentTimeMillis();
-        pilot = new LogitechF310(0);
+        this.pilot = pilot;
+        lastCamera = System.currentTimeMillis();
+        NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
     }
 
-
+//Moving and Teleop Method
     public void teleopUpdate(){
-
-        NetworkTableInstance.getDefault().getTable("Drive").getEntry("Transmission").getBoolean(transmissionStatus);
 
         flThrust.set(leftSpeed);
         frThrust.set(rightSpeed);
         blThrust.set(leftSpeed);
         brThrust.set(rightSpeed);
 
-        if(pilot.getRawButton(LogitechButton.BACK)){
-            shiftGear();
-        }
-
-
+        autoAim();
     }
 
+
+    public void moveForward(){
+        flThrust.set(.5);
+        frThrust.set(.5);
+        blThrust.set(.5);
+        brThrust.set(.5);        
+    }
+
+    public void moveBack(){
+        flThrust.set(-.5);
+        frThrust.set(-.5);
+        blThrust.set(-.5);
+        brThrust.set(-.5);
+    }
+
+//Auto Targeting Stuff
+
+    public void autoAim(){
+        if(pilot.getRawButton(LogitechButton.X) == true && v == 1){
+            if(Math.abs(x) > 2.5){
+             flThrust.set(.5);
+             frThrust.set(.5);
+             blThrust.set(.5);
+             brThrust.set(.5);
+            }
+            else{
+             flThrust.set(0);
+             frThrust.set(0);
+             blThrust.set(0);
+             brThrust.set(0);
+            }
+        }
+    }
+
+    public void changeCamera(){
+        if(pilot.getRawButton(LogitechButton.BACK) == true && System.currentTimeMillis() - lastCamera >= 1500){
+            if((int)NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").getNumber(1) == 1){
+		        NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(0);
+            }
+            else if((int)NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").getNumber(0) == 1){
+                NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
+            }
+        }
+        lastCamera = System.currentTimeMillis();
+    }
+
+
+//Utility Methods - Controllers
     public boolean leftZone(){
 
         if(pilot.getAxis(LogitechAxis.LY) > 0.1 || pilot.getAxis(LogitechAxis.LY) < -0.10){
@@ -102,13 +144,9 @@ public class Drive{
 
         return rightSpeed;
     }
-  
-    public void shiftGear() {
-		if (System.currentTimeMillis() - lastGearShift > 1500) {
-			transmissionL.set(!transmissionL.get());
-			transmissionR.set(!transmissionR.get());
-			lastGearShift = System.currentTimeMillis();
-		}
-	}
+
+    public double getLimelight(String arg) {
+        return NetworkTableInstance.getDefault().getTable("limelight").getEntry(arg).getDouble(0);
+      }
 
 }
