@@ -12,8 +12,8 @@ public class Blaster{
 
     TalonFX top, bot, tilt;
 
-    double tiltSpeed = .35;
-    double topSpeed = 0.6, botSpeed = 0.8;
+    double tiltSpeed = .45;
+    double topSpeed = -0.7, botSpeed = -0.9;
 
     ControlMode currentControl = ControlMode.PercentOutput; 
 
@@ -23,14 +23,16 @@ public class Blaster{
         top = new TalonFX(SystemMap.Blaster.TOPBLASTER);
         bot = new TalonFX(SystemMap.Blaster.BOTBLASTER);
         tilt = new TalonFX(SystemMap.Blaster.TILT);
-
+        
         bot.setInverted(InvertType.InvertMotorOutput);
+        tilt.getSensorCollection().setIntegratedSensorPosition(0, 0);
 
         this.gunner = gunner;
     }
 
     public void teleopUpdate(){
-        if(gunner.getAxis(LogitechAxis.RT) >= 0.1 && gunner.getAxis(LogitechAxis.LT) >= 0.1){
+        System.out.println(tilt.getSensorCollection().getIntegratedSensorPosition());
+        if(gunner.getAxis(LogitechAxis.RT) >= 0.1){
             bot.set(currentControl, botSpeed);
             top.set(currentControl, topSpeed);
         }
@@ -39,17 +41,18 @@ public class Blaster{
             top.set(currentControl, 0);
         }
 
-        if(gunner.getRawButton(LogitechButton.A) == true){
+        if(gunner.getRawButton(LogitechButton.Y) == true){
             tilt.set(currentControl, tiltSpeed);
         }
-        else if(gunner.getRawButton(LogitechButton.Y) == true){
+        else if(gunner.getRawButton(LogitechButton.A) == true){
             tilt.set(currentControl, tiltSpeed * -1);
         }
         else{
             tilt.set(currentControl, 0);
         }
+    
+        System.out.println();
+
     }
-
-
 
 }

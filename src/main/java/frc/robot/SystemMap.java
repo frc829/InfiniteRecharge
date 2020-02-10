@@ -5,8 +5,8 @@ public class SystemMap{
     class Drive{
         public static final int FLTHRUSTER = 10;
         public static final int FRTHRUSTER = 12;
-        public static final int BLTHRUSTER = 13;
-        public static final int BRTHRUSTER = 14;
+        public static final int BLTHRUSTER = 11;
+        public static final int BRTHRUSTER = 13;
     }
 
     class Blaster{

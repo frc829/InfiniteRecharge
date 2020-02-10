@@ -42,14 +42,16 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
-
+    
+    pilot = new LogitechF310(0);
+    gunner = new LogitechF310(1);
+    
     drive = new Drive(pilot);
     blaster = new Blaster(gunner);
     pez = new Pez(gunner);
     boost = new Boost(gunner);
     stabilizer = new Stabilizer();
-    pilot = new LogitechF310(0);
-    gunner = new LogitechF310(1);
+   
   }
 
   /**

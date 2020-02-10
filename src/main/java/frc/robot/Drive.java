@@ -4,23 +4,17 @@ import com.revrobotics.CANSparkMax;
 
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.util.Limelight;
 import frc.util.LogitechAxis;
 import frc.util.LogitechButton;
 import frc.util.LogitechF310;
 
 public class Drive{
 
-
     private CANSparkMax flThrust, frThrust, blThrust, brThrust;
     private LogitechF310 pilot;
     private double leftSpeed, rightSpeed;
-    private boolean isLeftZone, isRightZone;
-
-    public double v = getLimelight("tv");
-    public double x = getLimelight("tx");
-
-    long lastCamera;
+    private Limelight limelight;
 
     public Drive(LogitechF310 pilot){
         try {
@@ -32,24 +26,27 @@ public class Drive{
 
             flThrust.setInverted(true);
             blThrust.setInverted(true);
-
+            
+            
         } catch (Exception e) {
             System.out.println("Error while initializing.");
         }
+        this.limelight = new Limelight();
         this.pilot = pilot;
-        lastCamera = System.currentTimeMillis();
-        NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
     }
 
 //Moving and Teleop Method
     public void teleopUpdate(){
 
-        flThrust.set(leftSpeed);
-        frThrust.set(rightSpeed);
-        blThrust.set(leftSpeed);
-        brThrust.set(rightSpeed);
+        flThrust.set(leftZone());
+        frThrust.set(-rightZone());
+        blThrust.set(leftZone());
+        brThrust.set(rightZone());
+        if(pilot.getRawButton(LogitechButton.BACK) == true){
+            limelight.changeCamera();
+        }
 
-        autoAim();
+        //autoAim();
     }
 
 
@@ -70,8 +67,8 @@ public class Drive{
 //Auto Targeting Stuff
 
     public void autoAim(){
-        if(pilot.getRawButton(LogitechButton.X) == true && v == 1){
-            if(Math.abs(x) > 2.5){
+        if(pilot.getRawButton(LogitechButton.X) == true && limelight.getV() == 1){
+            if(Math.abs(limelight.getX()) > 2.5){
              flThrust.set(.5);
              frThrust.set(.5);
              blThrust.set(.5);
@@ -86,67 +83,30 @@ public class Drive{
         }
     }
 
-    public void changeCamera(){
-        if(pilot.getRawButton(LogitechButton.BACK) == true && System.currentTimeMillis() - lastCamera >= 1500){
-            if((int)NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").getNumber(1) == 1){
-		        NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(0);
-            }
-            else if((int)NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").getNumber(0) == 1){
-                NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
-            }
-        }
-        lastCamera = System.currentTimeMillis();
-    }
-
 
 //Utility Methods - Controllers
-    public boolean leftZone(){
+    public double leftZone(){
 
-        if(pilot.getAxis(LogitechAxis.LY) > 0.1 || pilot.getAxis(LogitechAxis.LY) < -0.10){
-            isLeftZone = true;
-        }
-        else
-            isLeftZone = false;
-
-        return isLeftZone;
-    }
-
-    public boolean rightZone(){
-
-        if(pilot.getAxis(LogitechAxis.RY) > 0.1 || pilot.getAxis(LogitechAxis.RY) < -0.1){
-            isRightZone = true;
-        }
-        else
-            isRightZone = false;
-
-
-        return isRightZone;
-    }
-
-    public double leftSpeed(){
-
-        if(isLeftZone == true){
-            leftSpeed = Math.pow(pilot.getAxis(LogitechAxis.LY), 0.75);
+        if(pilot.getAxis(LogitechAxis.LY) > 0.1 || pilot.getAxis(LogitechAxis.LY) < -0.1){
+            leftSpeed = pilot.getAxis(LogitechAxis.LY);
         }
         else
             leftSpeed = 0;
-
-        return leftSpeed;
+ 
+            return leftSpeed;
     }
 
-    public double rightSpeed(){
+    public double rightZone(){
 
-        if(isRightZone == true){
-            rightSpeed = Math.pow(pilot.getAxis(LogitechAxis.RY), 0.75);
+        if(pilot.getAxis(LogitechAxis.RY) > 0.1 || pilot.getAxis(LogitechAxis.RY) < -0.1){
+            rightSpeed = pilot.getAxis(LogitechAxis.RY);
         }
         else
             rightSpeed = 0;
 
-        return rightSpeed;
+            return rightSpeed;
     }
 
-    public double getLimelight(String arg) {
-        return NetworkTableInstance.getDefault().getTable("limelight").getEntry(arg).getDouble(0);
-      }
+    
 
 }

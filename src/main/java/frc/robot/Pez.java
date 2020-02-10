@@ -13,7 +13,7 @@ public class Pez{
 
     CANSparkMax rightIN, leftIN;
     TalonSRX beltL, beltR;
-    TalonFX pickup;
+    //TalonFX pickup;
     LogitechF310 gunner;
 
     public Pez(LogitechF310 gunner){
@@ -23,37 +23,48 @@ public class Pez{
     beltL = new TalonSRX(SystemMap.Pez.PEZL);
     beltR = new TalonSRX(SystemMap.Pez.PEZR);
 
-    pickup = new TalonFX(SystemMap.Pez.INTAKE);
+    //pickup = new TalonFX(SystemMap.Pez.INTAKE);
 
     beltL.setInverted(true);
     leftIN.setInverted(true);
 
-    this.gunner =gunner;
+    this.gunner = gunner;
 
     }
 
     public void teleopUpdate(){
      
-        if(gunner.getRawButton(LogitechButton.LB) == true && gunner.getRawButton(LogitechButton.LB) == true){
-            pickUp(0.35);
-            intake(.5, .5, .65, .65);
+        if(gunner.getRawButton(LogitechButton.LB) == true){
+            //pickUp(0.35);
+            intake(.8, .8);
         }
         else{
-            pickUp(0.0);
-            intake(0.0, 0.0, 0.0, 0.0);
+            intake(0.0, 0.0); 
+        }
+        if(gunner.getRawButton(LogitechButton.RB) == true){
+            belt( .5, .5);
+        }
+        else if(gunner.getRawButton(LogitechButton.B) == true){
+            belt(-.5, -.5);
+        }
+        else{
+            belt( 0, 0);
         }
 
     }
 
     public void pickUp(double num1){
-        pickup.set(ControlMode.PercentOutput, num1);
+        //pickup.set(ControlMode.PercentOutput, num1);
     }
 
-    public void intake(double num1, double num2, double num3, double num4){
-        rightIN.set(num1);
-        leftIN.set(num2);
-        beltL.set(ControlMode.PercentOutput, num3);
-        beltR.set(ControlMode.PercentOutput, num4);
+    public void intake(double num1, double num2){
+        rightIN.set(-num1);
+        leftIN.set(-num2);
+    }
+
+    public void belt(double num3, double num4){
+        beltL.set(ControlMode.PercentOutput, -1 * num3);
+        beltR.set(ControlMode.PercentOutput, -1 * num4);
     }
 
 }
