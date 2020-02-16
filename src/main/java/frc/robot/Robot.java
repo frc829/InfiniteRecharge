@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -32,6 +33,7 @@ public class Robot extends TimedRobot {
   Boost boost;
   LogitechF310 pilot, gunner;
   Stabilizer stabilizer;
+  Compressor compressor;
 
   /**
    * This function is run when the robot is first started up and should be
@@ -48,9 +50,11 @@ public class Robot extends TimedRobot {
     
     drive = new Drive(pilot);
     blaster = new Blaster(gunner);
-    pez = new Pez(gunner);
+    pez = new Pez(gunner, pilot);
     boost = new Boost(gunner);
     stabilizer = new Stabilizer();
+    Compressor compressor = new Compressor();
+    compressor.start();
    
   }
 

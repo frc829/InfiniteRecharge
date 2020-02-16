@@ -19,7 +19,7 @@ public abstract class Auto{
     public Auto(String n){
         this.drive = new Drive(pilot);
         this.blaster = new Blaster(gunner);
-        this.pez = new Pez(gunner);
+        this.pez = new Pez(gunner, pilot);
         this.stabilizer = new Stabilizer();
         this.systems = new SystemMap();
         this.name = n;

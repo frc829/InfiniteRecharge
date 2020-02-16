@@ -14,7 +14,8 @@ public class Drive{
     private CANSparkMax flThrust, frThrust, blThrust, brThrust;
     private LogitechF310 pilot;
     private double leftSpeed, rightSpeed;
-    private Limelight limelight;
+    private int ledMode, camMode;
+    private long lastCam;
 
     public Drive(LogitechF310 pilot){
         try {
@@ -27,11 +28,15 @@ public class Drive{
             flThrust.setInverted(true);
             blThrust.setInverted(true);
             
+            flThrust.setSmartCurrentLimit(40);
+            frThrust.setSmartCurrentLimit(40);
+            blThrust.setSmartCurrentLimit(40);
+            brThrust.setSmartCurrentLimit(40);
             
         } catch (Exception e) {
             System.out.println("Error while initializing.");
         }
-        this.limelight = new Limelight();
+        lastCam = System.currentTimeMillis();
         this.pilot = pilot;
     }
 
@@ -39,48 +44,77 @@ public class Drive{
     public void teleopUpdate(){
 
         flThrust.set(leftZone());
-        frThrust.set(-rightZone());
+        frThrust.set(rightZone());
         blThrust.set(leftZone());
         brThrust.set(rightZone());
-        if(pilot.getRawButton(LogitechButton.BACK) == true){
-            limelight.changeCamera();
+        if(pilot.getRawButton(LogitechButton.RB) == true){
+            //Limelight.changeCamera(0,0);
+        }
+        else{
+            //Limelight.changeCamera(1,1);
         }
 
-        //autoAim();
+       autoAim();
     }
 
 
     public void moveForward(){
-        flThrust.set(.5);
-        frThrust.set(.5);
-        blThrust.set(.5);
-        brThrust.set(.5);        
+        flThrust.set(.25);
+        frThrust.set(.25);
+        blThrust.set(.25);
+        brThrust.set(.25);        
+    }
+
+    public void turnRight(){
+        flThrust.set(.25);
+        frThrust.set(-.25);
+        blThrust.set(.25);
+        brThrust.set(-.25);    
+    }
+
+    public void turnLeft(){
+        flThrust.set(-.25);
+        frThrust.set(.25);
+        blThrust.set(-.25);
+        brThrust.set(.25);
     }
 
     public void moveBack(){
-        flThrust.set(-.5);
-        frThrust.set(-.5);
-        blThrust.set(-.5);
-        brThrust.set(-.5);
+        flThrust.set(-.25); 
+        frThrust.set(-.25);
+        blThrust.set(-.25);
+        brThrust.set(-.25);
     }
 
 //Auto Targeting Stuff
 
     public void autoAim(){
-        if(pilot.getRawButton(LogitechButton.X) == true && limelight.getV() == 1){
-            if(Math.abs(limelight.getX()) > 2.5){
-             flThrust.set(.5);
-             frThrust.set(.5);
-             blThrust.set(.5);
-             brThrust.set(.5);
+        ledMode = 0;
+        camMode = 0;
+        if(pilot.getRawButton(LogitechButton.X) == true){
+            //System.out.println("hey");
+            Limelight.changeCamera(camMode, ledMode);
+            if(Limelight.getV() == 1 && Limelight.getX() > 2.5){
+             turnRight();
+             System.out.println("tracking");
+            }
+            else if(Limelight.getV() == 1 && Limelight.getX() < -2.5){
+             turnLeft();
             }
             else{
              flThrust.set(0);
              frThrust.set(0);
              blThrust.set(0);
              brThrust.set(0);
+             //System.out.println("nah");
             }
         }
+        else{
+            ledMode = 0;
+            camMode = 1;
+            Limelight.changeCamera(camMode, ledMode);
+        }
+        lastCam = System.currentTimeMillis();
     }
 
 

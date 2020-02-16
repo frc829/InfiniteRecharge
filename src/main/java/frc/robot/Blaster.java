@@ -31,7 +31,7 @@ public class Blaster{
     }
 
     public void teleopUpdate(){
-        System.out.println(tilt.getSensorCollection().getIntegratedSensorPosition());
+        //System.out.println(tilt.getSensorCollection().getIntegratedSensorPosition());
         if(gunner.getAxis(LogitechAxis.RT) >= 0.1){
             bot.set(currentControl, botSpeed);
             top.set(currentControl, topSpeed);
@@ -50,8 +50,7 @@ public class Blaster{
         else{
             tilt.set(currentControl, 0);
         }
-    
-        System.out.println();
+
 
     }
 

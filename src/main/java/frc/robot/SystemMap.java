@@ -16,7 +16,8 @@ public class SystemMap{
     }
 
     class Boost{
-        public static final int BOOST = 16;
+        public static final int BOOST = 16;  
+        //public static final int PCM = 1;
     }
 
     class Pez{
@@ -25,9 +26,11 @@ public class SystemMap{
         public static final int MAROONR = 14;
         public static final int PEZL = 21;
         public static final int PEZR = 20;
+        public static final int DEADSPOT = 22;
         public static final int WOF = 18;
+        public static final int PORT1 = 0;
+        public static final int PORT2 = 1;
     }
-
 
 
 }
