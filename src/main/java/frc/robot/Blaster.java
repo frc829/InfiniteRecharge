@@ -4,6 +4,8 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.controller.PIDController;
 import frc.util.LogitechAxis;
 import frc.util.LogitechButton;
 import frc.util.LogitechF310;
@@ -11,9 +13,13 @@ import frc.util.LogitechF310;
 public class Blaster{
 
     TalonFX top, bot, tilt;
-
+    PIDController pid;
     double tiltSpeed = .45;
     double topSpeed = -0.7, botSpeed = -0.9;
+    DutyCycleEncoder b;
+    final double MAXCURRENT = 3.0;
+    double k = 1.0;
+    double deltaTime = .2;
 
     ControlMode currentControl = ControlMode.PercentOutput; 
 
@@ -23,11 +29,13 @@ public class Blaster{
         top = new TalonFX(SystemMap.Blaster.TOPBLASTER);
         bot = new TalonFX(SystemMap.Blaster.BOTBLASTER);
         tilt = new TalonFX(SystemMap.Blaster.TILT);
+        pid = new PIDController((3*k/5), ((6*k)/(5*deltaTime)), (3*k*deltaTime/40), deltaTime);
         
         bot.setInverted(InvertType.InvertMotorOutput);
         tilt.getSensorCollection().setIntegratedSensorPosition(0, 0);
 
         this.gunner = gunner;
+        this.b = new DutyCycleEncoder(3);
     }
 
     public void teleopUpdate(){
@@ -50,8 +58,7 @@ public class Blaster{
         else{
             tilt.set(currentControl, 0);
         }
-
-
+        this.topSpeed = pid.calculate(top.getStatorCurrent(), MAXCURRENT);
+        this.botSpeed = pid.calculate(bot.getStatorCurrent(), MAXCURRENT);
     }
-
 }
