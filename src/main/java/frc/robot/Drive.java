@@ -43,10 +43,11 @@ public class Drive {
     // Moving and Teleop Method
     public void teleopUpdate() {
 
-        flThrust.set(leftZone());
-        frThrust.set(rightZone());
-        blThrust.set(leftZone());
-        brThrust.set(rightZone());
+        flThrust.set(-rightZone());
+        frThrust.set(-leftZone());
+        blThrust.set(-rightZone());
+        brThrust.set(-leftZone());
+
         if(pilot.getRawButton(LogitechButton.RB) == true) {
             // Limelight.changeCamera(0,0);
         } 
@@ -96,50 +97,23 @@ public class Drive {
 
     public void autoAim() {
         lastCam = System.currentTimeMillis();
-        // ledMode = 0;
-        // camMode = 0;
         if(pilot.getRawButton(LogitechButton.X) == true) {
-            // // System.out.println("hey");
-            //     Limelight.changeCamera(camMode, ledMode);
-            //     if(Limelight.getV() == 1 && Limelight.getX() > 2.5) {
-            //         turnLeft(.25);
-            //         System.out.println("tracking");
-            //     } 
-            //     else if(Limelight.getV() == 1 && Limelight.getX() < -2.5) {
-            //         turnRight(.25);
-            //         System.out.println("tracking");
-            //     } 
-            //     else if(Limelight.getV() == 0){
-            //         turnRight(.25);
-            //         System.out.println("pp poopoo");
-            //     }
-            //     else{
-            //         flThrust.set(0);
-            //         frThrust.set(0);
-            //         blThrust.set(0);
-            //         brThrust.set(0);
-            //         // System.out.println("nah");
-            //     }
             Limelight.changeCamera(0, 0);
             if(Limelight.getV() == 1){
                 if(Math.abs(Limelight.getX()) > 10){
-                    turnLeft(.1);
-                    System.out.println("It's on the left");
+                    double outputSpeed = -(3.822)*Math.pow((Limelight.getX()*Math.PI/180), 3)+.1;
+                    turnLeft(outputSpeed);
                 }
-                else {
+                else{
                     stopAllMotors();
                 }
             }
             else{
-                
-                    turnLeft(.25);
-                    System.out.println("tracking");
-                
+                turnLeft(.4);
+                System.out.println("tracking");
             }
         } 
         else{
-            // ledMode = 0;
-            // camMode = 1;
             Limelight.changeCamera(1, 1);
         }
     }
@@ -152,7 +126,7 @@ public class Drive {
         } 
         else
             leftSpeed = 0;
-
+            
         return leftSpeed;
     }
 

@@ -13,7 +13,7 @@ import frc.util.LogitechF310;
 public class Pez {
 
     CANSparkMax rightIN, leftIN;
-    TalonSRX beltL, beltR;
+    TalonSRX beltL, beltR, WOF;
     CANSparkMax pickup, deadSpot;
     DoubleSolenoid taker;
     LogitechF310 gunner, pilot;
@@ -30,16 +30,19 @@ public class Pez {
         leftIN = new CANSparkMax(SystemMap.Pez.MAROONL, MotorType.kBrushless);
         beltL = new TalonSRX(SystemMap.Pez.PEZL);
         beltR = new TalonSRX(SystemMap.Pez.PEZR);
+        WOF = new TalonSRX(SystemMap.Pez.WOF);
 
         taker = new DoubleSolenoid(SystemMap.Pez.PORT1, SystemMap.Pez.PORT2);
 
         taker.set(DoubleSolenoid.Value.kReverse);
 
         pickup = new CANSparkMax(SystemMap.Pez.INTAKE, MotorType.kBrushless);
-        // deadSpot = new CANSparkMax(SystemMap.Pez.DEADSPOT, MotorType.kBrushless);
+        deadSpot = new CANSparkMax(SystemMap.Pez.DEADSPOT, MotorType.kBrushless);
 
         beltL.setInverted(true);
+        rightIN.setInverted(true);
         leftIN.setInverted(true);
+        pickup.setInverted(true);
 
         toggle = System.currentTimeMillis();
 
@@ -58,7 +61,7 @@ public class Pez {
                 lastOne = 0;
                 delay = System.currentTimeMillis();
             }
-            pickUp(0.35);
+            pickUp(0.9);
             intake(.8, .8);
             if(System.currentTimeMillis() - delay > 150){
                 double deltaC = leftIN.getOutputCurrent();
@@ -73,7 +76,7 @@ public class Pez {
                
         } else if (gunner.getRawButton(LogitechButton.X) == true) {
             intake(-.5, -.5);
-            pickUp(-0.35);
+            pickUp(-0.9);
         } else {
             intake(0, 0);
             pickUp(0);
@@ -94,12 +97,12 @@ public class Pez {
 
     public void pickUp(double num1) {
         pickup.set(num1);
-        // deadSpot.set(num1);
+        deadSpot.set(-num1);
     }
 
     public void intake(double num1, double num2) {
         rightIN.set(-num1);
-        leftIN.set(-num2);
+        leftIN.set(num2);
        
     }
 

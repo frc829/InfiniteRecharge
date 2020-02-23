@@ -112,6 +112,7 @@ public class Robot extends TimedRobot {
     drive.teleopUpdate();
     blaster.teleopUpdate();
     pez.teleopUpdate();
+    boost.teleopUpdate();
     stabilizer.update();
   }
 

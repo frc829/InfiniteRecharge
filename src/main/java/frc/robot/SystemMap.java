@@ -3,10 +3,10 @@ package frc.robot;
 public class SystemMap{
 
     class Drive{
-        public static final int FLTHRUSTER = 10;
-        public static final int FRTHRUSTER = 12;
-        public static final int BLTHRUSTER = 11;
-        public static final int BRTHRUSTER = 13;
+        public static final int FLTHRUSTER = 13;
+        public static final int FRTHRUSTER = 11;
+        public static final int BLTHRUSTER = 12;
+        public static final int BRTHRUSTER = 10;
     }
 
     class Blaster{
@@ -17,7 +17,8 @@ public class SystemMap{
 
     class Boost{
         public static final int BOOST = 16;  
-        //public static final int PCM = 1;
+        public static final int CLIMB1 = 2;
+        public static final int CLIMB2 = 3;
     }
 
     class Pez{
