@@ -7,6 +7,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import frc.util.Limelight;
+import frc.util.LogitechAxis;
 import frc.util.LogitechButton;
 import frc.util.LogitechF310;
 
@@ -62,7 +63,7 @@ public class Pez {
                 delay = System.currentTimeMillis();
             }
             pickUp(0.9);
-            intake(.8, .8);
+            intake(.8, .8, .8);
             if(System.currentTimeMillis() - delay > 150){
                 double deltaC = leftIN.getOutputCurrent();
               
@@ -75,10 +76,17 @@ public class Pez {
             }
                
         } else if (gunner.getRawButton(LogitechButton.X) == true) {
-            intake(-.5, -.5);
+            intake(-.5, -.5, .5);
             pickUp(-0.9);
-        } else {
-            intake(0, 0);
+        } 
+        else if(gunner.getAxis(LogitechAxis.RT) > .1){
+            if(gunner.getAxis(LogitechAxis.LT) > .1){
+                intake(-.5, -.5, .5);
+            }
+            
+        }
+        else{
+            intake(0, 0, 0);
             pickUp(0);
             buttonJustPressed = false;
         }
@@ -97,13 +105,12 @@ public class Pez {
 
     public void pickUp(double num1) {
         pickup.set(num1);
-        deadSpot.set(-num1);
     }
 
-    public void intake(double num1, double num2) {
+    public void intake(double num1, double num2, double num3) {
         rightIN.set(-num1);
         leftIN.set(num2);
-       
+        deadSpot.set(-num3);
     }
 
     public void belt(double num3, double num4) {

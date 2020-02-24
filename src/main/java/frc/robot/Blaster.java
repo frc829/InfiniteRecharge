@@ -54,10 +54,10 @@ public class Blaster{
             this.start = 0;
         }
 
-        if(gunner.getRawButton(LogitechButton.Y) == true){
+        if(gunner.getRawButton(LogitechButton.A) == true){
             tilt.set(currentControl, tiltSpeed);
         }
-        else if(gunner.getRawButton(LogitechButton.A) == true){
+        else if(gunner.getRawButton(LogitechButton.Y) == true){
             tilt.set(currentControl, tiltSpeed * -1);
         }
         else if(gunner.getPOV() == 0){
