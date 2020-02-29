@@ -7,10 +7,13 @@
 
 package frc.robot;
 
+import com.analog.adis16470.frc.ADIS16470_IMU;
+
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.autos.*;
 import frc.util.LogitechF310;
 
 /**
@@ -21,10 +24,8 @@ import frc.util.LogitechF310;
  * project.
  */
 public class Robot extends TimedRobot {
-  private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
-  private String m_autoSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
+  private Auto m_autoSelected;
+  private final SendableChooser<Auto> autoChooser = new SendableChooser<Auto>();
 
 
   Drive drive;
@@ -32,8 +33,17 @@ public class Robot extends TimedRobot {
   Pez pez;
   Boost boost;
   LogitechF310 pilot, gunner;
-  Stabilizer stabilizer;
+  Camera camera;
+  SystemMap sm;
+  ADIS16470_IMU gyro;
   Compressor compressor;
+
+  public void addAutos(){
+    autoChooser.addOption("Do Nothing", new DoNothing(drive, blaster, pez, sm, gyro));
+    autoChooser.addOption("Move Forward", new MoveForward(drive, blaster, pez, sm, gyro));
+    autoChooser.addOption("Shoot", new Shoot(drive, blaster, pez,  sm, gyro));
+    SmartDashboard.putData("Auto choices", autoChooser);
+  }
 
   /**
    * This function is run when the robot is first started up and should be
@@ -41,21 +51,22 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
-    SmartDashboard.putData("Auto choices", m_chooser);
     
+
     pilot = new LogitechF310(0);
     gunner = new LogitechF310(1);
+    gyro = new ADIS16470_IMU();
     
-    drive = new Drive(pilot);
-    blaster = new Blaster(gunner);
+    drive = new Drive(pilot, gunner, gyro);
+    blaster = new Blaster(gunner, pilot);
     pez = new Pez(gunner, pilot);
     boost = new Boost(gunner);
-    stabilizer = new Stabilizer();
-    Compressor compressor = new Compressor();
+    sm = new SystemMap();
+    camera = new Camera();
+    compressor = new Compressor();
     compressor.start();
-   
+
+    addAutos();
   }
 
   /**
@@ -83,9 +94,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
+    m_autoSelected = autoChooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
+    SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   /**
@@ -93,15 +105,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
-    }
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+    autoChooser.getSelected().execute();
   }
 
   /**
@@ -113,7 +118,6 @@ public class Robot extends TimedRobot {
     blaster.teleopUpdate();
     pez.teleopUpdate();
     boost.teleopUpdate();
-    stabilizer.update();
   }
 
   /**

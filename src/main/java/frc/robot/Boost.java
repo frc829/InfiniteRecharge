@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Solenoid;
 import frc.util.LogitechAxis;
 import frc.util.LogitechButton;
@@ -14,6 +15,8 @@ public class Boost{
     TalonSRX booster;
     Solenoid raise, otherRaise;
     LogitechF310 gunner;
+    DutyCycleEncoder hook;
+    double startHook, stay;
 
     long delay = 500, start = 0;
     boolean isTeleop = false;
@@ -27,6 +30,10 @@ public class Boost{
             otherRaise.set(false);
             this.gunner = gunner;
             this.start = System.currentTimeMillis();
+
+            this.hook = new DutyCycleEncoder(7);
+            this.startHook = hook.get() * 1000;
+
             booster.setNeutralMode(NeutralMode.Brake);
         }
 
@@ -36,15 +43,28 @@ public class Boost{
         //     isTeleop = true;
         //     startOfTeleop = System.currentTimeMillis();
         // }
+        hook.reset();
         lift();
+        System.out.println("Hook: " + hook.get());
+        
     }
 
     public void lift(){
         if(gunner.getAxis(LogitechAxis.LY) > 0.1 || gunner.getAxis(LogitechAxis.LY) < -0.1){
-            booster.set(ControlMode.PercentOutput, gunner.getAxis(LogitechAxis.LY)*0.4);
+            booster.set(ControlMode.PercentOutput, gunner.getAxis(LogitechAxis.LY)*-0.4);
+            stay = hook.get();
         }
         else{
-            booster.set(ControlMode.PercentOutput, -.03);
+            if(hook.get() > stay + .25){
+                booster.set(ControlMode.PercentOutput, -.1);
+            }
+            else if(hook.get() < stay - .2){
+                booster.set(ControlMode.PercentOutput, .1);
+            }
+            else{
+                booster.set(ControlMode.PercentOutput, 0.05);
+            }
+            
         }
         if(System.currentTimeMillis() - start >= delay){
             if(gunner.getRawButton(LogitechButton.START) && !isUp){
@@ -61,4 +81,10 @@ public class Boost{
             }
         }
     }
+
+    public void holdPOS(){
+
+    }
+
+
 }

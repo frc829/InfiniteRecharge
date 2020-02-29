@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.analog.adis16470.frc.ADIS16470_IMU;
+
 //import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.util.LogitechF310;
 
@@ -8,7 +10,7 @@ public abstract class Auto{
     protected Drive drive;
     protected Blaster blaster;
     protected Pez pez;
-    protected Stabilizer stabilizer;
+    protected ADIS16470_IMU gyro;
     protected SystemMap systems;
     protected String name;
     protected int step;
@@ -16,22 +18,19 @@ public abstract class Auto{
     public LogitechF310 pilot = new LogitechF310(0);
     public LogitechF310 gunner = new LogitechF310(1);
 
-    public Auto(String n){
-        this.drive = new Drive(pilot);
-        this.blaster = new Blaster(gunner);
-        this.pez = new Pez(gunner, pilot);
-        this.stabilizer = new Stabilizer();
-        this.systems = new SystemMap();
+    public Auto(String n, Drive d, Blaster b, Pez p, SystemMap m, ADIS16470_IMU gyro){
+        this.drive = d;
+        this.blaster = b;
+        this.pez = p;
+        this.systems = m;
         this.name = n;
         this.step = 0;
+        this.gyro = new ADIS16470_IMU();
+        resetGyro();
     }
 
     public abstract void execute();
-    public abstract void updateSmartDashboard();
 
-    public Drive getDrive(){
-        return this.drive;
-    }
 
     public int getStep(){
         return this.step;
@@ -41,20 +40,8 @@ public abstract class Auto{
         this.step += 1;
     }
 
-    public Blaster getBlaster(){
-        return this.blaster;
-    }
-
-    public Pez getPez(){
-        return this.pez;
-    }
-
-    public Stabilizer getStabilizer(){
-        return this.stabilizer;
-    }
-
-    public SystemMap getSystemMap(){
-        return this.systems;
+    public void resetGyro(){
+        this.gyro.reset();
     }
 
     public String getName(){

@@ -6,7 +6,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import frc.util.Limelight;
+
 import frc.util.LogitechAxis;
 import frc.util.LogitechButton;
 import frc.util.LogitechF310;
@@ -16,7 +16,7 @@ public class Pez {
     CANSparkMax rightIN, leftIN;
     TalonSRX beltL, beltR, WOF;
     CANSparkMax pickup, deadSpot;
-    DoubleSolenoid taker;
+    public DoubleSolenoid taker;
     LogitechF310 gunner, pilot;
     long toggle;
     long delay;
@@ -64,30 +64,24 @@ public class Pez {
             }
             pickUp(0.9);
             intake(.8, .8, .8);
-            if(System.currentTimeMillis() - delay > 150){
-                double deltaC = leftIN.getOutputCurrent();
-              
-                lastOne = leftIN.getOutputCurrent();
-                if(deltaC >= 2.5){
-                    System.out.println(deltaC);
-                    Limelight.changeCamera(1, (lightState++)%2);
-                }
-                
-            }
                
         } else if (gunner.getRawButton(LogitechButton.X) == true) {
-            intake(-.5, -.5, .5);
+            intake(-.5, -.5, -.5);
             pickUp(-0.9);
         } 
         else if(gunner.getAxis(LogitechAxis.RT) > .1){
             if(gunner.getAxis(LogitechAxis.LT) > .1){
-                intake(-.5, -.5, .5);
+                intake(.5,.5, .5);
             }
             
+        }
+        else if(gunner.getAxis(LogitechAxis.LT) > .1){
+            WOF.set(ControlMode.PercentOutput, .5);
         }
         else{
             intake(0, 0, 0);
             pickUp(0);
+            WOF.set(ControlMode.PercentOutput, 0);
             buttonJustPressed = false;
         }
         if (gunner.getRawButton(LogitechButton.RB) == true) {
@@ -128,6 +122,22 @@ public class Pez {
             toggle = System.currentTimeMillis();
         }
 
+    }
+
+    public void shiftIntake(){
+        if (taker.get() == DoubleSolenoid.Value.kForward) {
+            taker.set(DoubleSolenoid.Value.kReverse);
+        } else {
+            taker.set(DoubleSolenoid.Value.kForward);
+        }
+    }
+
+    public void startBelt(){
+        belt(.75, .75);
+    }
+
+    public void stopBelt(){
+        belt(0, 0);
     }
 
 }

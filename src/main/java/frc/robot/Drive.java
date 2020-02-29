@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.analog.adis16470.frc.ADIS16470_IMU;
 import com.revrobotics.CANSparkMax;
 
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -9,23 +10,26 @@ import frc.util.*;
 public class Drive {
 
     private CANSparkMax flThrust, frThrust, blThrust, brThrust;
-    private LogitechF310 pilot;
+    private LogitechF310 pilot, gunner;
     private double leftSpeed, rightSpeed;
-    private int ledMode, camMode;
-    private long lastCam;
+    boolean xPressed = false;
+    ADIS16470_IMU gyro;
     
     
 
-    public Drive(LogitechF310 pilot) {
+    public Drive(LogitechF310 pilot, LogitechF310 gunner, ADIS16470_IMU gyro) {
         try{
 
             flThrust = new CANSparkMax(SystemMap.Drive.FLTHRUSTER, MotorType.kBrushless);
             frThrust = new CANSparkMax(SystemMap.Drive.FRTHRUSTER, MotorType.kBrushless);
             blThrust = new CANSparkMax(SystemMap.Drive.BLTHRUSTER, MotorType.kBrushless);
             brThrust = new CANSparkMax(SystemMap.Drive.BRTHRUSTER, MotorType.kBrushless);
+            gyro = new ADIS16470_IMU();
 
             flThrust.setInverted(true);
             blThrust.setInverted(true);
+
+            this.resetEncoders();
 
             flThrust.setSmartCurrentLimit(40);
             frThrust.setSmartCurrentLimit(40);
@@ -36,8 +40,8 @@ public class Drive {
         catch(Exception e){
             System.out.println("Error while initializing.");
         }
-        lastCam = System.currentTimeMillis();
         this.pilot = pilot;
+        this.gunner = gunner;
     }
 
     // Moving and Teleop Method
@@ -48,14 +52,17 @@ public class Drive {
         blThrust.set(-rightZone());
         brThrust.set(-leftZone());
 
-        if(pilot.getRawButton(LogitechButton.RB) == true) {
-            // Limelight.changeCamera(0,0);
-        } 
-        else{
-            // Limelight.changeCamera(1,1);
+        if(pilot.getRawButton(LogitechButton.A) == true){
+            System.out.println("changing");
+            Limelight.changeCamera(0, 0);
+            autoAim();
         }
-
-        autoAim();
+        else{
+            System.out.println("not changing");
+            if(gunner.getPOV() != 180)
+                Limelight.changeCamera(1,1);
+        }
+        
     }
 
     public void moveForward(double x) {
@@ -94,14 +101,15 @@ public class Drive {
     }
 
     // Auto Targeting Stuff
-
     public void autoAim() {
-        lastCam = System.currentTimeMillis();
-        if(pilot.getRawButton(LogitechButton.X) == true) {
-            Limelight.changeCamera(0, 0);
+        long start = 1;
+        //double outputSpeed = -(3.822)*Math.pow((Math.abs(Limelight.getX())*Math.PI/180), 3)+.1;
+        double outputSpeed = .1;
             if(Limelight.getV() == 1){
-                if(Math.abs(Limelight.getX()) > 10){
-                    double outputSpeed = -(3.822)*Math.pow((Limelight.getX()*Math.PI/180), 3)+.1;
+                if(Limelight.getX() > 3){
+                    turnRight(outputSpeed);
+                }
+                else if(Limelight.getX() < -1){
                     turnLeft(outputSpeed);
                 }
                 else{
@@ -109,13 +117,8 @@ public class Drive {
                 }
             }
             else{
-                turnLeft(.4);
-                System.out.println("tracking");
+                //turnRight(.5);
             }
-        } 
-        else{
-            Limelight.changeCamera(1, 1);
-        }
     }
 
     // Utility Methods - Controllers
@@ -141,4 +144,39 @@ public class Drive {
         return rightSpeed;
     }
 
+    public void driveToAngle(double targetAngle){
+        System.out.println(gyro.getAngle());
+        double outputSpeed = (3.822)*Math.pow((Math.abs(gyro.getAngle())*Math.PI/180), 3)+.1;
+        if(targetAngle - gyro.getAngle() >= 5){
+            turnLeft(outputSpeed);
+        }
+        else if(targetAngle - gyro.getAngle() <= -5){
+           turnRight(outputSpeed);
+        }
+        else{
+            stopAllMotors();
+        }
+    }
+
+    public boolean driveToDistance(double speed, double distance){
+        double encoderCounts = (13.2/(Math.PI * 9))*distance;
+        if(brThrust.getEncoder().getPosition() <= encoderCounts-.05){
+            System.out.println(brThrust.getEncoder().getPosition());
+            moveForward(speed);
+            return false;
+        }
+        else{
+            resetEncoders();
+            stopAllMotors();
+            return true;
+        }
+
+    }
+
+    public void resetEncoders(){
+        frThrust.getEncoder().setPosition(0);
+        flThrust.getEncoder().setPosition(0);
+        brThrust.getEncoder().setPosition(0);
+        blThrust.getEncoder().setPosition(0);
+    }
 }

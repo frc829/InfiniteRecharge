@@ -11,17 +11,8 @@ public class Limelight{
     }
 
     public static void changeCamera(int camMode, int ledMode){
-        NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(camMode);
         NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(ledMode);
-
-        /* Number limelightState = NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").getNumber(1);
-
-            if( limelightState == (Number)1 ){
-		        NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(0);
-            }
-            else {
-                NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
-            }*/
+        NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(camMode);
     }
 
     public static double getV(){
@@ -30,5 +21,9 @@ public class Limelight{
 
     public static double getX(){
         return getLimelight("tx");
+    }
+
+    public static double getY(){
+        return getLimelight("ty");
     }
 }
