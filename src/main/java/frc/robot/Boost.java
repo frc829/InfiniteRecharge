@@ -45,8 +45,6 @@ public class Boost{
         // }
         hook.reset();
         lift();
-        System.out.println("Hook: " + hook.get());
-        
     }
 
     public void lift(){

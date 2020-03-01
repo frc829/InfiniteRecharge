@@ -24,7 +24,7 @@ public class Drive {
             frThrust = new CANSparkMax(SystemMap.Drive.FRTHRUSTER, MotorType.kBrushless);
             blThrust = new CANSparkMax(SystemMap.Drive.BLTHRUSTER, MotorType.kBrushless);
             brThrust = new CANSparkMax(SystemMap.Drive.BRTHRUSTER, MotorType.kBrushless);
-            gyro = new ADIS16470_IMU();
+            gyro = this.gyro;
 
             flThrust.setInverted(true);
             blThrust.setInverted(true);
@@ -53,12 +53,10 @@ public class Drive {
         brThrust.set(-leftZone());
 
         if(pilot.getRawButton(LogitechButton.A) == true){
-            System.out.println("changing");
             Limelight.changeCamera(0, 0);
             autoAim();
         }
         else{
-            System.out.println("not changing");
             if(gunner.getPOV() != 180)
                 Limelight.changeCamera(1,1);
         }

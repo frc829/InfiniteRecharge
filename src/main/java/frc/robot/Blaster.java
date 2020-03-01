@@ -19,7 +19,7 @@ public class Blaster{
     double tiltSpeed = .75;
     double topSpeed = 0, botSpeed = 0;
     DutyCycleEncoder abs;
-    double startPos, toIntake = -0.7, toTrench = -.975, autoShoot = -.8;
+    double startPos, toIntake = -0.5, toTrench = -1.1, autoShoot = -.8;
     final double MAXCURRENT = 3.0;
     double k = -1.0;
     double deltaTime = .2;
@@ -44,7 +44,12 @@ public class Blaster{
         this.gunner = gunner;
         this.pilot = pilot;
         this.abs = new DutyCycleEncoder(1);
-        this.startPos = abs.get() * 1000;
+        double st = System.currentTimeMillis();
+        while(System.currentTimeMillis() - st < 1000){
+            
+        }
+        this.startPos = abs.get();
+        System.out.println(startPos);
 
     }
 
@@ -98,7 +103,7 @@ public class Blaster{
         else{
             if(!pilot.getRawButton(LogitechButton.A))
                 Limelight.changeCamera(1, 1);
-            tilt.set(currentControl, 0);
+            tilt.set(currentControl, -.05);
         }
         
         //this.topSpeed = pid.calculate(top.getStatorCurrent(), MAXCURRENT);

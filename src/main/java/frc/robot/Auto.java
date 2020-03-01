@@ -25,7 +25,7 @@ public abstract class Auto{
         this.systems = m;
         this.name = n;
         this.step = 0;
-        this.gyro = new ADIS16470_IMU();
+        this.gyro = gyro;
         resetGyro();
     }
 

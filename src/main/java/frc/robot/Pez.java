@@ -57,7 +57,6 @@ public class Pez {
 
         if (gunner.getRawButton(LogitechButton.B) == true) {
             if(!buttonJustPressed){
-                System.out.println("Button Just Pressed");
                 buttonJustPressed= true;
                 lastOne = 0;
                 delay = System.currentTimeMillis();
