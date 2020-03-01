@@ -54,7 +54,7 @@ public class Blaster{
     }
 
     public void teleopUpdate(){
-        System.out.println("Current Pos:" + abs.get());
+        //System.out.println("Current Pos:" + abs.get());
         if(gunner.getAxis(LogitechAxis.RT) >= 0.1){
             // ramp();
 
@@ -121,11 +121,12 @@ public class Blaster{
     // }
 
     public void autoAim(){
-        double x = (22+(8*12+2.25))/Math.atan((Limelight.getY()+20)*Math.PI/180);
-        double angle = Math.atan2((8*12+2.25)-16.5, x);
-        angle = (1.27/90 * angle)-.7;
+        double x = (22+(8*12+2.25))/Math.atan((Limelight.getY())*Math.PI/180);
+        double angle = Math.atan2((8*12+2.25)-16.5, x + 17.5);
+        angle = (1.27/85 * angle) * 100;
+        System.out.println(angle);
 
-        setPOS(angle + startPos);
+        setPOS(-(angle-startPos));
     }
 
     public int shootingForAuto(double topSpeed, double botSpeed, long start){
@@ -189,7 +190,7 @@ public class Blaster{
         System.out.println("Step 0");
         boolean returnVal;
         double outSpeed = (3.0 * Math.pow(abs.get() - target, 3) / 4) + .9;
-        if(Math.abs(target - abs.get()) <= .1){
+        if(Math.abs(target - abs.get()) <= .05){
             tilt.set(ControlMode.PercentOutput, 0);
             returnVal = true;
         }
