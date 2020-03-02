@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 public class Shoot extends Auto{
 
     long start;
+    double autoShoot = -.8;
 
     public Shoot(Drive d, Blaster b, Pez p, SystemMap m, ADIS16470_IMU gyro) {
         super("Shoot", d, b, p, m, gyro);
@@ -23,10 +24,10 @@ public class Shoot extends Auto{
                 break;
             }
             case 1:{
-                if(this.blaster.shootingForAuto(.7, .5, start) == 1){
+                if(this.blaster.shootingForAuto(.7, .5, start, autoShoot) == 1){
                     this.pez.startBelt();
                 }
-                else if(this.blaster.shootingForAuto(.7, .5, start) == 2){
+                else if(this.blaster.shootingForAuto(.7, .5, start, autoShoot) == 2){
                     this.nextStep();
                 }
                 break;
