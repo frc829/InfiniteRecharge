@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 public class RBigShoot extends Auto{
 
     long start;
+    double autoShoot1 = -.8, autoShoot2;
 
     public RBigShoot(Drive d, Blaster b, Pez p, SystemMap m, ADIS16470_IMU gyro){
         super("Right Big Shoot", d, b, p, m, gyro);
@@ -23,34 +24,46 @@ public class RBigShoot extends Auto{
                 break;
             }
             case 1:{
-                if(this.blaster.shootingForAuto(.7, .5, start) == 1){
+                if(this.blaster.shootingForAuto(.7, .5, start, autoShoot1,5000) == 1){
                     this.pez.startBelt();
                 }
-                else if(this.blaster.shootingForAuto(.7, .5, start) == 2){
+                else if(this.blaster.shootingForAuto(.7, .5, start, autoShoot1,5000) == 2){
                     this.nextStep();
                 }
                 break;
             }
             case 2:{
-                //Angle
+                if(!this.drive.driveToAngle(33)){
+                    this.nextStep();
+                }
+                break;
             }
             case 3:{
+                this.pez.intake(.5, .5, .5);
+                this.drive.resetEncoders();
+                this.nextStep();
+                break;
+            }
+            case 4:{
                 if(this.drive.driveToDistance(.5, 10)){
                     this.nextStep();
                 }
                 break;
             }
-            case 4:{
-                //Turn on intake
-            }
             case 5:{
-                //Move Backwards
+                if(!this.drive.driveToAngle(33)){
+                    this.nextStep();
+                }
+                break;
             }
             case 6:{
-                //Angle
-            }
-            case 7:{
-                //Shoot
+                if(this.blaster.shootingForAuto(.7, .5, start, autoShoot2,5000) == 1){
+                    this.pez.startBelt();
+                }
+                else if(this.blaster.shootingForAuto(.7, .5, start, autoShoot2,5000) == 2){
+                    this.nextStep();
+                }
+                break;
             }
             default:{
                 this.drive.stopAllMotors();

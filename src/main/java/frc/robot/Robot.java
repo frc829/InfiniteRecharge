@@ -64,7 +64,7 @@ public class Robot extends TimedRobot {
     sm = new SystemMap();
     camera = new Camera();
     compressor = new Compressor();
-    compressor.start();
+    compressor.stop();
 
     addAutos();
   }
@@ -118,6 +118,7 @@ public class Robot extends TimedRobot {
     blaster.teleopUpdate();
     pez.teleopUpdate();
     boost.teleopUpdate();
+    compressor.start();
   }
 
   /**

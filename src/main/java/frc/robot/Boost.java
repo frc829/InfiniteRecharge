@@ -49,7 +49,7 @@ public class Boost{
 
     public void lift(){
         if(gunner.getAxis(LogitechAxis.LY) > 0.1 || gunner.getAxis(LogitechAxis.LY) < -0.1){
-            booster.set(ControlMode.PercentOutput, gunner.getAxis(LogitechAxis.LY)*-0.4);
+            booster.set(ControlMode.PercentOutput, gunner.getAxis(LogitechAxis.LY)*0.4);
             stay = hook.get();
         }
         else{

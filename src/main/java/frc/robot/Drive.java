@@ -2,10 +2,11 @@ package frc.robot;
 
 import com.analog.adis16470.frc.ADIS16470_IMU;
 import com.revrobotics.CANSparkMax;
-
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import frc.util.*;
+//import sun.nio.cs.ext.EUC_CN;
 
 public class Drive {
 
@@ -15,7 +16,8 @@ public class Drive {
     boolean xPressed = false;
     ADIS16470_IMU gyro;
     
-    
+    double startGyro;
+    boolean isTurning = false;
 
     public Drive(LogitechF310 pilot, LogitechF310 gunner, ADIS16470_IMU gyro) {
         try{
@@ -24,17 +26,29 @@ public class Drive {
             frThrust = new CANSparkMax(SystemMap.Drive.FRTHRUSTER, MotorType.kBrushless);
             blThrust = new CANSparkMax(SystemMap.Drive.BLTHRUSTER, MotorType.kBrushless);
             brThrust = new CANSparkMax(SystemMap.Drive.BRTHRUSTER, MotorType.kBrushless);
-            gyro = this.gyro;
+            this.gyro = gyro;
+            gyro.reset();
 
             flThrust.setInverted(true);
             blThrust.setInverted(true);
 
             this.resetEncoders();
+ 
+            flThrust.setSmartCurrentLimit(50);
+            frThrust.setSmartCurrentLimit(50);
+            blThrust.setSmartCurrentLimit(50);
+            brThrust.setSmartCurrentLimit(50);
 
-            flThrust.setSmartCurrentLimit(40);
-            frThrust.setSmartCurrentLimit(40);
-            blThrust.setSmartCurrentLimit(40);
-            brThrust.setSmartCurrentLimit(40);
+            
+            flThrust.setIdleMode(IdleMode.kCoast);
+            frThrust.setIdleMode(IdleMode.kCoast);
+            blThrust.setIdleMode(IdleMode.kCoast);
+            brThrust.setIdleMode(IdleMode.kCoast);
+
+            flThrust.setOpenLoopRampRate(0);
+            frThrust.setOpenLoopRampRate(0);
+            blThrust.setOpenLoopRampRate(0);
+            brThrust.setOpenLoopRampRate(0);
 
         } 
         catch(Exception e){
@@ -47,10 +61,12 @@ public class Drive {
     // Moving and Teleop Method
     public void teleopUpdate() {
 
-        flThrust.set(-rightZone());
-        frThrust.set(-leftZone());
+        // flThrust.set(-rightZone());
+        // frThrust.set(-leftZone());
         blThrust.set(-rightZone());
         brThrust.set(-leftZone());
+        //System.out.println("Gyro Angle:" + gyro.getAngle());
+        System.out.println("EncoderCounts:" + blThrust.getEncoder().getPosition());
 
         if(pilot.getRawButton(LogitechButton.A) == true){
             Limelight.changeCamera(0, 0);
@@ -100,14 +116,13 @@ public class Drive {
 
     // Auto Targeting Stuff
     public void autoAim() {
-        long start = 1;
         //double outputSpeed = -(3.822)*Math.pow((Math.abs(Limelight.getX())*Math.PI/180), 3)+.1;
         double outputSpeed = .1;
             if(Limelight.getV() == 1){
-                if(Limelight.getX() > 3){
+                if(Limelight.getX() > -5){
                     turnRight(outputSpeed);
                 }
-                else if(Limelight.getX() < -1){
+                else if(Limelight.getX() < -7){
                     turnLeft(outputSpeed);
                 }
                 else{
@@ -121,7 +136,7 @@ public class Drive {
 
     // Utility Methods - Controllers
     public double leftZone() {
-
+        System.out.println("Left JoyStick: " + LogitechAxis.LY);
         if(pilot.getAxis(LogitechAxis.LY) > 0.1 || pilot.getAxis(LogitechAxis.LY) < -0.1) {
             leftSpeed = pilot.getAxis(LogitechAxis.LY);
         } 
@@ -142,18 +157,49 @@ public class Drive {
         return rightSpeed;
     }
 
-    public void driveToAngle(double targetAngle){
-        System.out.println(gyro.getAngle());
-        double outputSpeed = (3.822)*Math.pow((Math.abs(gyro.getAngle())*Math.PI/180), 3)+.1;
-        if(targetAngle - gyro.getAngle() >= 5){
-            turnLeft(outputSpeed);
+    // public boolean driveToAngle(double targetAngle){
+    //     System.out.println(gyro.getAngle());
+    //     double outputSpeed = (3.822)*Math.pow((Math.abs(gyro.getAngle())*Math.PI/180), 3)+.1;
+    //     if(targetAngle - gyro.getAngle() >= 5){
+    //         turnLeft(outputSpeed);
+    //         return false;
+    //     }
+    //     else if(targetAngle - gyro.getAngle() <= -5){
+    //        turnRight(outputSpeed);
+    //        return false;
+    //     }
+    //     else{
+    //         stopAllMotors();
+    //         return true;
+    //     }
+    // }
+    long lastTurn = 1000000000;
+    public boolean driveToAngle(double relativeTarget){
+        //double outputSpeed = (3.822)*Math.pow((Math.abs(gyro.getAngle())*Math.PI/180), 3)+.1;
+        double outputSpeed = .1 + .2*Math.abs(gyro.getAngle()-startGyro-relativeTarget)/10;
+        if(!isTurning){
+            startGyro = gyro.getAngle();
+            isTurning = true;
         }
-        else if(targetAngle - gyro.getAngle() <= -5){
-           turnRight(outputSpeed);
+        if(gyro.getAngle()-.4>startGyro+relativeTarget){
+            turnRight(outputSpeed);
+            lastTurn = System.currentTimeMillis();
+            return false;
+        }
+        else if(gyro.getAngle()+.4<startGyro+relativeTarget){
+            turnLeft(outputSpeed);
+            lastTurn = System.currentTimeMillis();
+            return false;
         }
         else{
             stopAllMotors();
+            if(System.currentTimeMillis() - lastTurn > 1000){
+                isTurning = false;
+                return true;
+            }
+            return false;
         }
+
     }
 
     public boolean driveToDistance(double speed, double distance){

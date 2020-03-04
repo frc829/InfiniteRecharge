@@ -19,7 +19,7 @@ public class Blaster{
     double tiltSpeed = .75;
     double topSpeed = 0, botSpeed = 0;
     DutyCycleEncoder abs;
-    double startPos, toIntake = -0.5, toTrench = -1.1, autoShoot = -.8;
+    double startPos, toIntake = -0.5, toTrench = -1.1;
     final double MAXCURRENT = 3.0;
     double k = -1.0;
     double deltaTime = .2;
@@ -54,9 +54,9 @@ public class Blaster{
     }
 
     public void teleopUpdate(){
-        //System.out.println("Current Pos:" + abs.get());
+        System.out.println("Current Pos:" + abs.get());
         if(gunner.getAxis(LogitechAxis.RT) >= 0.1){
-            // ramp();
+            //ramp();
 
             if(top.getSelectedSensorVelocity()<18900){
                 topSpeed+=.01;
@@ -121,26 +121,29 @@ public class Blaster{
     // }
 
     public void autoAim(){
-        double x = (22+(8*12+2.25))/Math.atan((Limelight.getY())*Math.PI/180);
-        double angle = Math.atan2((8*12+2.25)-16.5, x + 17.5);
-        angle = (1.27/85 * angle) * 100;
+        //Height: 98.25
+        double x = (90 - 22.5)/Math.tan((Limelight.getY()+20)*Math.PI/180);
+        double angle = Math.atan((90 - 17.25)/ (x + 17));
+        angle = (2*1.27*angle/Math.PI);
+        System.out.println("Reading Limelight Angle:" + Limelight.getY());
         System.out.println(angle);
-
-        setPOS(-(angle-startPos));
+        System.out.println(startPos - 1.27 + angle);
+        setPOS(angle - startPos);
+        
     }
 
-    public int shootingForAuto(double topSpeed, double botSpeed, long start){
-        if(setPOSAuto(startPos + autoShoot)){
-            long shootTime = 4000;
+    public int shootingForAuto(double topSpeed, double botSpeed, long start, double angle, long waitForBelts){
+        if(setPOSAuto(startPos + angle)){
+            long shootTime = 3000;
             bot.set(currentControl, botSpeed);
             top.set(currentControl, topSpeed);
             
-            if(System.currentTimeMillis() - start <= shootTime && System.currentTimeMillis() - start >= 2000){
+            if(System.currentTimeMillis() - start >= waitForBelts &&  System.currentTimeMillis() - start < shootTime+waitForBelts){
                 System.out.println("Step 1");
                 System.out.println(System.currentTimeMillis() - start);
                 return 1;
             }
-            else if(System.currentTimeMillis() - start > shootTime){
+            else if(System.currentTimeMillis() - start >= shootTime+waitForBelts){
                 bot.set(currentControl, 0);
                 top.set(currentControl, 0);
                 System.out.println("Step 2");
@@ -174,7 +177,7 @@ public class Blaster{
     }
     
     public void setPOS(double target){
-        double outSpeed = (3.0 * Math.pow(abs.get() - target, 3) / 4) + .9;
+        double outSpeed = (3.0 * Math.pow(abs.get() - target, 3) / 4) + .4;
         if(Math.abs(target - abs.get()) <= .1){
             tilt.set(ControlMode.PercentOutput, 0);
         }
@@ -189,7 +192,7 @@ public class Blaster{
     public boolean setPOSAuto(double target){
         System.out.println("Step 0");
         boolean returnVal;
-        double outSpeed = (3.0 * Math.pow(abs.get() - target, 3) / 4) + .9;
+        double outSpeed = (3.0 * Math.pow(abs.get() - target, 3) / 4) + .6;
         if(Math.abs(target - abs.get()) <= .05){
             tilt.set(ControlMode.PercentOutput, 0);
             returnVal = true;
