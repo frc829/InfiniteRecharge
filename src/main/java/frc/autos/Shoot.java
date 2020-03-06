@@ -24,10 +24,10 @@ public class Shoot extends Auto{
                 break;
             }
             case 1:{
-                if(this.blaster.shootingForAuto(.7, .5, start, autoShoot,5000) == 1){
+                if(this.blaster.shootingForAuto(.7, .5, start, autoShoot, 5000) == 1){
                     this.pez.startBelt();
                 }
-                else if(this.blaster.shootingForAuto(.7, .5, start, autoShoot,5000) == 2){
+                else if(this.blaster.shootingForAuto(.7, .5, start, autoShoot, 5000) == 2){
                     this.pez.stopBelt();
                     this.nextStep();
                 }

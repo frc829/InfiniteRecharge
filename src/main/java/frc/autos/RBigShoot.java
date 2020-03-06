@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 public class RBigShoot extends Auto{
 
     long start;
-    double autoShoot1 = -.8, autoShoot2;
+    double autoShoot1 = -.825, autoShoot2;
 
     public RBigShoot(Drive d, Blaster b, Pez p, SystemMap m, ADIS16470_IMU gyro){
         super("Right Big Shoot", d, b, p, m, gyro);
@@ -26,45 +26,48 @@ public class RBigShoot extends Auto{
             case 1:{
                 if(this.blaster.shootingForAuto(.7, .5, start, autoShoot1,5000) == 1){
                     this.pez.startBelt();
+                    this.pez.intake(.5, .5, .5);
+                    
                 }
                 else if(this.blaster.shootingForAuto(.7, .5, start, autoShoot1,5000) == 2){
+                    this.pez.stopBelt();
                     this.nextStep();
                 }
                 break;
             }
             case 2:{
-                if(!this.drive.driveToAngle(33)){
+                if(!this.drive.driveToAngle(-33)){
                     this.nextStep();
                 }
                 break;
             }
             case 3:{
-                this.pez.intake(.5, .5, .5);
-                this.drive.resetEncoders();
+                this.pez.pickUp(.5);
                 this.nextStep();
                 break;
             }
             case 4:{
-                if(this.drive.driveToDistance(.5, 10)){
+                this.drive.resetEncoders();
+                if(this.drive.driveToDistance(.5, 5)){
                     this.nextStep();
                 }
                 break;
             }
-            case 5:{
-                if(!this.drive.driveToAngle(33)){
-                    this.nextStep();
-                }
-                break;
-            }
-            case 6:{
-                if(this.blaster.shootingForAuto(.7, .5, start, autoShoot2,5000) == 1){
-                    this.pez.startBelt();
-                }
-                else if(this.blaster.shootingForAuto(.7, .5, start, autoShoot2,5000) == 2){
-                    this.nextStep();
-                }
-                break;
-            }
+            // case 5:{
+            //     if(!this.drive.driveToAngle(-33)){
+            //         this.nextStep();
+            //     }
+            //     break;
+            // }
+            // case 6:{
+            //     if(this.blaster.shootingForAuto(.7, .5, start, autoShoot2,5000) == 1){
+            //         this.pez.startBelt();
+            //     }
+            //     else if(this.blaster.shootingForAuto(.7, .5, start, autoShoot2,5000) == 2){
+            //         this.nextStep();
+            //     }
+            //     break;
+            // }
             default:{
                 this.drive.stopAllMotors();
             }

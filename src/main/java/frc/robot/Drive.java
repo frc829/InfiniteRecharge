@@ -16,8 +16,8 @@ public class Drive {
     boolean xPressed = false;
     ADIS16470_IMU gyro;
     
-    double startGyro;
-    boolean isTurning = false;
+    //double startGyro;
+    //boolean isTurning = false;
 
     public Drive(LogitechF310 pilot, LogitechF310 gunner, ADIS16470_IMU gyro) {
         try{
@@ -61,12 +61,12 @@ public class Drive {
     // Moving and Teleop Method
     public void teleopUpdate() {
 
-        // flThrust.set(-rightZone());
-        // frThrust.set(-leftZone());
+        flThrust.set(-rightZone());
+        frThrust.set(-leftZone());
         blThrust.set(-rightZone());
         brThrust.set(-leftZone());
         //System.out.println("Gyro Angle:" + gyro.getAngle());
-        System.out.println("EncoderCounts:" + blThrust.getEncoder().getPosition());
+        //System.out.println("EncoderCounts:" + blThrust.getEncoder().getPosition());
 
         if(pilot.getRawButton(LogitechButton.A) == true){
             Limelight.changeCamera(0, 0);
@@ -119,24 +119,21 @@ public class Drive {
         //double outputSpeed = -(3.822)*Math.pow((Math.abs(Limelight.getX())*Math.PI/180), 3)+.1;
         double outputSpeed = .1;
             if(Limelight.getV() == 1){
-                if(Limelight.getX() > -5){
+                if(Limelight.getX() > -8){
                     turnRight(outputSpeed);
                 }
-                else if(Limelight.getX() < -7){
+                else if(Limelight.getX() < -10){
                     turnLeft(outputSpeed);
                 }
                 else{
                     stopAllMotors();
                 }
             }
-            else{
-                //turnRight(.5);
-            }
     }
 
     // Utility Methods - Controllers
     public double leftZone() {
-        System.out.println("Left JoyStick: " + LogitechAxis.LY);
+        //System.out.println("Left JoyStick: " + LogitechAxis.LY);
         if(pilot.getAxis(LogitechAxis.LY) > 0.1 || pilot.getAxis(LogitechAxis.LY) < -0.1) {
             leftSpeed = pilot.getAxis(LogitechAxis.LY);
         } 
@@ -174,27 +171,27 @@ public class Drive {
     //     }
     // }
     long lastTurn = 1000000000;
-    public boolean driveToAngle(double relativeTarget){
-        //double outputSpeed = (3.822)*Math.pow((Math.abs(gyro.getAngle())*Math.PI/180), 3)+.1;
-        double outputSpeed = .1 + .2*Math.abs(gyro.getAngle()-startGyro-relativeTarget)/10;
-        if(!isTurning){
-            startGyro = gyro.getAngle();
-            isTurning = true;
-        }
-        if(gyro.getAngle()-.4>startGyro+relativeTarget){
+    public boolean driveToAngle(double targetAngle){
+        double outputSpeed = (3.822)*Math.pow((Math.abs(gyro.getAngle() - targetAngle)*Math.PI/180), 3)+.1;
+        //double outputSpeed = .1 + .2*Math.abs(gyro.getAngle()-startGyro-relativeTarget)/10;
+        // if(!isTurning){
+        //     startGyro = gyro.getAngle();
+        //     isTurning = true;
+        // }
+        if(gyro.getAngle()-.5>targetAngle){
             turnRight(outputSpeed);
             lastTurn = System.currentTimeMillis();
-            return false;
+            return true;
         }
-        else if(gyro.getAngle()+.4<startGyro+relativeTarget){
+        else if(gyro.getAngle()+.5<targetAngle){
             turnLeft(outputSpeed);
             lastTurn = System.currentTimeMillis();
-            return false;
+            return true;
         }
         else{
             stopAllMotors();
             if(System.currentTimeMillis() - lastTurn > 1000){
-                isTurning = false;
+                //isTurning = true;
                 return true;
             }
             return false;
@@ -205,7 +202,7 @@ public class Drive {
     public boolean driveToDistance(double speed, double distance){
         double encoderCounts = (13.2/(Math.PI * 9))*distance;
         if(brThrust.getEncoder().getPosition() <= encoderCounts-.05){
-            System.out.println(brThrust.getEncoder().getPosition());
+            //System.out.println(brThrust.getEncoder().getPosition());
             moveForward(speed);
             return false;
         }

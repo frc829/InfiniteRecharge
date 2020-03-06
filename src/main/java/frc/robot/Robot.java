@@ -42,6 +42,7 @@ public class Robot extends TimedRobot {
     autoChooser.addOption("Do Nothing", new DoNothing(drive, blaster, pez, sm, gyro));
     autoChooser.addOption("Move Forward", new MoveForward(drive, blaster, pez, sm, gyro));
     autoChooser.addOption("Shoot", new Shoot(drive, blaster, pez,  sm, gyro));
+    autoChooser.addOption("Right Big Shoot", new RBigShoot(drive, blaster, pez,  sm, gyro));
     SmartDashboard.putData("Auto choices", autoChooser);
   }
 

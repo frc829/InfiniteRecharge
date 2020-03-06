@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
@@ -19,7 +20,7 @@ public class Blaster{
     double tiltSpeed = .75;
     double topSpeed = 0, botSpeed = 0;
     DutyCycleEncoder abs;
-    double startPos, toIntake = -0.5, toTrench = -1.1;
+    double startPos, toIntake = -0.5, toTrench = -1.1, toFront = .21;
     final double MAXCURRENT = 3.0;
     double k = -1.0;
     double deltaTime = .2;
@@ -45,8 +46,11 @@ public class Blaster{
         this.pilot = pilot;
         this.abs = new DutyCycleEncoder(1);
         double st = System.currentTimeMillis();
-        while(System.currentTimeMillis() - st < 1000){
-            
+        tilt.setNeutralMode(NeutralMode.Coast);
+        while(abs.get() == 0){
+            if(!(abs.get() == 0)){
+                this.startPos = abs.get();
+            }
         }
         this.startPos = abs.get();
         System.out.println(startPos);
@@ -62,7 +66,7 @@ public class Blaster{
                 topSpeed+=.01;
             }
 
-             if(bot.getSelectedSensorVelocity()<16800){
+             if(bot.getSelectedSensorVelocity()<14700){
                 botSpeed+=.01;
             }
             
@@ -70,9 +74,6 @@ public class Blaster{
 
             bot.set(shooterControl, this.botSpeed);
             top.set(shooterControl, this.topSpeed);
-        }
-        else if(gunner.getPOV() == 270){
-            trenchRun();
         }
         else{
             bot.set(shooterControl, 0);
@@ -83,7 +84,7 @@ public class Blaster{
         }
 
         if(gunner.getAxis(LogitechAxis.RY) > 0.1){
-            System.out.println(gunner.getAxis(LogitechAxis.RY));
+            // System.out.println(gunner.getAxis(LogitechAxis.RY));
             tilt.set(currentControl, Math.pow(gunner.getAxis(LogitechAxis.RY), tiltSpeed));
         }
         else if(gunner.getAxis(LogitechAxis.RY) < -0.1){
@@ -96,9 +97,15 @@ public class Blaster{
         else if(gunner.getPOV() == 90){
             setPOS(startPos + toTrench);
         }
+        else if(gunner.getRawButton(LogitechButton.START)){
+            tilt.setNeutralMode(NeutralMode.Brake);
+        }
         else if(gunner.getPOV() == 180){
             Limelight.changeCamera(0, 0);
             autoAim();
+        }
+        else if(gunner.getPOV() == 270){
+            setPOS(startPos + toFront);
         }
         else{
             if(!pilot.getRawButton(LogitechButton.A))
@@ -122,14 +129,13 @@ public class Blaster{
 
     public void autoAim(){
         //Height: 98.25
-        double x = (90 - 22.5)/Math.tan((Limelight.getY()+20)*Math.PI/180);
-        double angle = Math.atan((90 - 17.25)/ (x + 17));
-        angle = (2*1.27*angle/Math.PI);
-        System.out.println("Reading Limelight Angle:" + Limelight.getY());
-        System.out.println(angle);
-        System.out.println(startPos - 1.27 + angle);
-        setPOS(angle - startPos);
-        
+        double x = (98.25 - 22.5)/Math.tan((Limelight.getY()+20)*Math.PI/180);
+        double angle = Math.atan((98.25 - 17.25)/ (x + 17));
+        angle *= (9 /(4*Math.PI));
+        // System.out.println("Reading Limelight Angle:" + Limelight.getY());
+        //System.out.println(angle);
+        //System.out.println(startPos - 1.2 + angle);
+        setPOS(angle - startPos + .09);
     }
 
     public int shootingForAuto(double topSpeed, double botSpeed, long start, double angle, long waitForBelts){
@@ -139,14 +145,12 @@ public class Blaster{
             top.set(currentControl, topSpeed);
             
             if(System.currentTimeMillis() - start >= waitForBelts &&  System.currentTimeMillis() - start < shootTime+waitForBelts){
-                System.out.println("Step 1");
-                System.out.println(System.currentTimeMillis() - start);
                 return 1;
             }
             else if(System.currentTimeMillis() - start >= shootTime+waitForBelts){
                 bot.set(currentControl, 0);
                 top.set(currentControl, 0);
-                System.out.println("Step 2");
+                // System.out.println("Step 2");
                 return 2;
             }
             else{
@@ -160,25 +164,10 @@ public class Blaster{
         }
         
     }
-
-    public void trenchRun(){
-        setPOS(startPos + toTrench);
-
-        if(top.getSelectedSensorVelocity()<18900){
-            topSpeed+=.01;
-        }
-
-         if(bot.getSelectedSensorVelocity()<16800){
-            botSpeed+=.01;
-        }
-
-        bot.set(shooterControl, this.botSpeed);
-        top.set(shooterControl, this.topSpeed);
-    }
     
     public void setPOS(double target){
         double outSpeed = (3.0 * Math.pow(abs.get() - target, 3) / 4) + .4;
-        if(Math.abs(target - abs.get()) <= .1){
+        if(Math.abs(target - abs.get()) <= .15){
             tilt.set(ControlMode.PercentOutput, 0);
         }
         else if(abs.get() < target){
