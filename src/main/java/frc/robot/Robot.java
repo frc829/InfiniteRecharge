@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.autos.*;
-import frc.util.LogitechF310;
+import frc.util.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -33,7 +33,6 @@ public class Robot extends TimedRobot {
   Pez pez;
   Boost boost;
   LogitechF310 pilot, gunner;
-  Camera camera;
   SystemMap sm;
   ADIS16470_IMU gyro;
   Compressor compressor;
@@ -41,8 +40,8 @@ public class Robot extends TimedRobot {
   public void addAutos(){
     autoChooser.addOption("Do Nothing", new DoNothing(drive, blaster, pez, sm, gyro));
     autoChooser.addOption("Move Forward", new MoveForward(drive, blaster, pez, sm, gyro));
-    autoChooser.addOption("Shoot", new Shoot(drive, blaster, pez,  sm, gyro));
     autoChooser.addOption("Right Big Shoot", new RBigShoot(drive, blaster, pez,  sm, gyro));
+    autoChooser.setDefaultOption("Shoot", new Shoot(drive, blaster, pez, sm, gyro));
     SmartDashboard.putData("Auto choices", autoChooser);
   }
 
@@ -53,7 +52,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     
-
+    Limelight.changeCamera(1,1);
     pilot = new LogitechF310(0);
     gunner = new LogitechF310(1);
     gyro = new ADIS16470_IMU();
@@ -61,9 +60,8 @@ public class Robot extends TimedRobot {
     drive = new Drive(pilot, gunner, gyro);
     blaster = new Blaster(gunner, pilot);
     pez = new Pez(gunner, pilot);
-    boost = new Boost(gunner);
+    boost = new Boost(gunner, pilot);
     sm = new SystemMap();
-    camera = new Camera();
     compressor = new Compressor();
     compressor.stop();
 

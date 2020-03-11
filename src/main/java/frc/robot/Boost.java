@@ -14,7 +14,7 @@ public class Boost{
 
     TalonSRX booster;
     Solenoid raise, otherRaise;
-    LogitechF310 gunner;
+    LogitechF310 gunner, pilot;
     DutyCycleEncoder hook;
     double startHook, stay;
 
@@ -22,13 +22,14 @@ public class Boost{
     boolean isTeleop = false;
     boolean isUp = false;
     
-        public Boost(LogitechF310 gunner){
+        public Boost(LogitechF310 gunner, LogitechF310 pilot){
             this.booster = new TalonSRX(SystemMap.Boost.BOOST);
             this.raise = new Solenoid(SystemMap.Boost.CLIMB1);
             raise.set(false);
             this.otherRaise = new Solenoid(SystemMap.Boost.CLIMB2);
             otherRaise.set(false);
             this.gunner = gunner;
+            this.pilot = pilot;
             this.start = System.currentTimeMillis();
 
             this.hook = new DutyCycleEncoder(7);
@@ -48,8 +49,8 @@ public class Boost{
     }
 
     public void lift(){
-        if(gunner.getAxis(LogitechAxis.LY) > 0.1 || gunner.getAxis(LogitechAxis.LY) < -0.1){
-            booster.set(ControlMode.PercentOutput, gunner.getAxis(LogitechAxis.LY)*0.4);
+        if(Math.abs(gunner.getAxis(LogitechAxis.LY)) > 0.1){
+            booster.set(ControlMode.PercentOutput, -gunner.getAxis(LogitechAxis.LY));
             stay = hook.get();
         }
         else{
@@ -65,13 +66,13 @@ public class Boost{
             
         }
         if(System.currentTimeMillis() - start >= delay){
-            if(gunner.getRawButton(LogitechButton.START) && !isUp){
+            if(pilot.getRawButton(LogitechButton.START) && !isUp){
                 raise.set(true);
                 otherRaise.set(true);
                 isUp = !isUp;
                 start = System.currentTimeMillis();
             }
-            else if(gunner.getRawButton(LogitechButton.START) && isUp){
+            else if(pilot.getRawButton(LogitechButton.START) && isUp){
                 raise.set(false);
                 otherRaise.set(false);
                 isUp = !isUp;
@@ -79,10 +80,4 @@ public class Boost{
             }
         }
     }
-
-    public void holdPOS(){
-
-    }
-
-
 }

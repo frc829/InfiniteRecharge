@@ -79,6 +79,6 @@ public class RBigShoot extends Auto{
     //Step 3: Move forward
     //Step 4: Turn on intake
     //Step 5: Move Backwards
-    //Step 6: Angle
+    //Step 6: Anglea
     //Step 7: Shoot
 }

@@ -20,7 +20,7 @@ public class Blaster{
     double tiltSpeed = .75;
     double topSpeed = 0, botSpeed = 0;
     DutyCycleEncoder abs;
-    double startPos, toIntake = -0.5, toTrench = -1.1, toFront = .21;
+    double startPos, toIntake = -0.5, toTrench = -1.1, toFront = -.4;
     final double MAXCURRENT = 3.0;
     double k = -1.0;
     double deltaTime = .2;
@@ -46,7 +46,7 @@ public class Blaster{
         this.pilot = pilot;
         this.abs = new DutyCycleEncoder(1);
         double st = System.currentTimeMillis();
-        tilt.setNeutralMode(NeutralMode.Coast);
+        tilt.setNeutralMode(NeutralMode.Brake);
         while(abs.get() == 0){
             if(!(abs.get() == 0)){
                 this.startPos = abs.get();
@@ -63,11 +63,11 @@ public class Blaster{
             //ramp();
 
             if(top.getSelectedSensorVelocity()<18900){
-                topSpeed+=.01;
+                topSpeed+=.1;
             }
 
              if(bot.getSelectedSensorVelocity()<14700){
-                botSpeed+=.01;
+                botSpeed+=.1;
             }
             
             //System.out.println("Shooter Velocity: " + bot.getSelectedSensorVelocity();
@@ -97,12 +97,11 @@ public class Blaster{
         else if(gunner.getPOV() == 90){
             setPOS(startPos + toTrench);
         }
-        else if(gunner.getRawButton(LogitechButton.START)){
-            tilt.setNeutralMode(NeutralMode.Brake);
-        }
         else if(gunner.getPOV() == 180){
             Limelight.changeCamera(0, 0);
-            autoAim();
+            if(Limelight.getV() == 1){
+                autoAim();
+            }
         }
         else if(gunner.getPOV() == 270){
             setPOS(startPos + toFront);

@@ -119,10 +119,10 @@ public class Drive {
         //double outputSpeed = -(3.822)*Math.pow((Math.abs(Limelight.getX())*Math.PI/180), 3)+.1;
         double outputSpeed = .1;
             if(Limelight.getV() == 1){
-                if(Limelight.getX() > -8){
+                if(Limelight.getX() > -11){
                     turnRight(outputSpeed);
                 }
-                else if(Limelight.getX() < -10){
+                else if(Limelight.getX() < -13){
                     turnLeft(outputSpeed);
                 }
                 else{

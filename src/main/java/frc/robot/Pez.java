@@ -20,9 +20,10 @@ public class Pez {
     LogitechF310 gunner, pilot;
     long toggle;
     long delay;
+    long lastLight;
     double lastOne = 0;
 
-    Boolean buttonJustPressed = false;
+    boolean buttonJustPressed = false;
     int lightState = 0;
 
     public Pez(LogitechF310 gunner, LogitechF310 pilot) {
@@ -46,6 +47,7 @@ public class Pez {
         pickup.setInverted(true);
 
         toggle = System.currentTimeMillis();
+        lastLight= System.currentTimeMillis();
 
         this.gunner = gunner;
         this.pilot = pilot;
@@ -68,19 +70,21 @@ public class Pez {
             intake(-.5, -.5, -.5);
             pickUp(-0.9);
         } 
-        else if(gunner.getAxis(LogitechAxis.RT) > .1){
-            if(gunner.getAxis(LogitechAxis.LT) > .1){
-                intake(.5,.5, .5);
-            }
-            
-        }
         else if(gunner.getAxis(LogitechAxis.LT) > .1){
-            WOF.set(ControlMode.PercentOutput, .5);
+            if(lightState % 3 < 2){
+                WOF.set(ControlMode.PercentOutput, 1);
+            }
+            else{
+                WOF.set(ControlMode.PercentOutput, 1);
+                WOF.set(ControlMode.PercentOutput, 0);
+                lightState++;
+            }
         }
         else{
             intake(0, 0, 0);
             pickUp(0);
             WOF.set(ControlMode.PercentOutput, 0);
+            lightState++;
             buttonJustPressed = false;
         }
         if (gunner.getRawButton(LogitechButton.RB) == true) {
